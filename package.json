@@ -1,0 +1,31 @@
+{
+  "name": "patientanalyser",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "sudo $(which node) $(which nodemon) ./index.js",
+    "start": "node ./index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "chalk": "^5.4.1",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.13",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-forge": "^1.3.1",
+    "node-xlsx": "^0.24.0",
+    "nodemon": "^3.1.9",
+    "xlsx": "^0.18.5"
+  }
+}
