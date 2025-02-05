@@ -1,4 +1,11 @@
 import { exec, execSync, execFileSync } from "child_process"
+
+export const handleThrowError = (code, msg) => {
+    const error = new Error(msg)
+    error.status = code
+    return error
+}
+
 export const handleResult = (res, data, code) => {
     res.status(code).json({ status: code, result: data, reason: "ok" })
 }

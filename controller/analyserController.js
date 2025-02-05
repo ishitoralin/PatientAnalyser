@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { handleResult, handleError } from "./helper.js";
-import { transferXlsxToJson } from "./module.js"
+import { getData, getList, transferXlsxToJson } from "./module.js"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadFolder = path.join(__dirname, "../upload");
@@ -24,11 +24,44 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const analyserController = {
     upload: upload,
+    analyser_analyse: async (req, res) => {
+        try {
+            const query = req.query.file
+            if (!query) {
+                return handleError(res, "Please specify file", 404)
+            }
+
+            const result = getData(query)
+            handleResult(res, result, 200)
+        } catch (error) {
+            handleError(res, error.message, error.status)
+        }
+    },
+    analyser_list: async (req, res) => {
+        try {
+            const result = getList()
+            return handleResult(res, result, 200);
+        } catch (error) {
+            return handleError(res, error, 404);
+        }
+    },
     analyser_ping: async (req, res) => {
         try {
-            handleResult(res, "hello2", 200);
+            return handleResult(res, "hello", 200);
         } catch (error) {
-            handleError(res, "hello", 404);
+            return handleError(res, "hello", 404);
+        }
+    },
+    analyser_read: async (req, res) => {
+        try {
+            const query = req.query.file
+            if (!query) {
+                return handleError(res, "Please specify target file", 404);
+            }
+            const jsonData = transferXlsxToJson(query)
+            return handleResult(res, jsonData, 200);
+        } catch (error) {
+            return handleError(res, "Failed to read file", 500);
         }
     },
     analyser_upload: async (req, res) => {
@@ -42,20 +75,12 @@ const analyserController = {
                 file: req.file.originalname,
             };
 
-            handleResult(res, result, 200);
+            return handleResult(res, result, 200);
         } catch (error) {
             console.error("Upload error:", error);
-            handleError(res, "File upload failed", 500);
+            return handleError(res, "File upload failed", 500);
         }
     },
-    analyser_read: async (req, res) => {
-        try {
-            const jsonData = transferXlsxToJson()
-            handleResult(res, jsonData, 200);
-        } catch (error) {
-            handleError(res, "Failed to read file", 500);
-        }
-    }
 };
 
 export default analyserController;
