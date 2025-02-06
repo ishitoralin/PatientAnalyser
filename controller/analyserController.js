@@ -32,9 +32,9 @@ const analyserController = {
             }
 
             const result = getData(query)
-            handleResult(res, result, 200)
+            return handleResult(res, result, 200)
         } catch (error) {
-            handleError(res, error.message, error.status)
+            return handleError(res, error.message, error.status)
         }
     },
     analyser_list: async (req, res) => {

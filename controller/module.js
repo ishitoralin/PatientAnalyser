@@ -8,40 +8,52 @@ import { handleThrowError } from "./helper.js"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadPath = path.join(__dirname, "../upload")
+const outputPath = path.join(__dirname, "../outputs/hello.xlsx")
 
 export const getData = (file) => {
     const list = getList()
     const targetFile = list.filter((item) => item === file)[0]
     if (!targetFile) {
-        throw handleThrowError(404, "File not found")
-    }
-    const jsonData = transferXlsxToJson(targetFile).filter((item) => item["欄5"] === "初診" || item["欄5"] === "複診")
-        .sort((a, b) => a["病歷號碼"] - (b["病歷號碼"]));
-
-    const result = []
-    for (const item of jsonData) {
-        if (item["欄5"] === "初診") {
-            result.push({ [item["姓名"]]: [] })
-        }
+        handleThrowError(404, "File not found")
     }
 
-    for (const multi of jsonData) {
-        for (let i = 0; i < result.length; i++) {
-            const key = Object.keys(result[i])[0]
-            if (multi["姓名"] === key) {
-                result[i][key].push({ id: multi["病歷號碼"], date: multi["就診日期"], dr: multi["醫師"], status: multi["欄5"] })
-            }
-        }
-    }
+    const [head, body] = transferXlsxToJson(targetFile)
 
-    const sortResult = result.filter((item) => {
-        const key = Object.keys(item)[0]
-        if (item[key].length >= 3) {
-            return item
-        }
-    })
+    const timesIndex = head.indexOf("欄5")
+    console.log(body.length)
+    body.filter((item) => item[timesIndex] === "初診" || item[timesIndex] === "複診2")
+    console.log(body.length)
+    // const jsonData = transferXlsxToJson(targetFile).filter((item) => item["欄5"] === "初診" || item["欄5"] === "複診")
+    //     .sort((a, b) => a["病歷號碼"] - (b["病歷號碼"]));
 
-    return sortResult
+    // const oneTimePatientList = []
+    // for (const item of jsonData) {
+    //     if (item["欄5"] === "初診") {
+    //         oneTimePatientList.push(item["病歷號碼"])
+    //     }
+    // }
+
+    // const result = []
+    // for (const patient of jsonData) {
+    //     for (const pid of oneTimePatientList) {
+    //         if (patient["病歷號碼"] === pid) {
+    //             result.push({ id: patient["病歷號碼"], date: patient["就診日期"], dr: patient["醫師"], status: patient["欄5"] })
+    //         }
+    //     }
+    // }
+
+    // result.sort((a, b) => a.id - b.id);
+
+    // const data = [
+    //     [1, 2, 3],
+    //     [true, false, null, 'sheetjs'],
+    //     ['foo', 'bar', new Date('2014-02-19T14:30Z'), '0.3'],
+    //     ['baz', null, 'qux'],
+    // ];
+    // const buffer = xlsx.build([{ name: 'mySheetName', data: data }])
+
+    // fs.writeFileSync(outputPath, buffer)
+    return body
 }
 
 export const getList = () => {
@@ -55,14 +67,14 @@ export const transferXlsxToJson = (query) => {
     const head = workSheetsFromFile[0].data[0];
     const body = workSheetsFromFile[0].data.slice(1);
 
-    const jsonData = []
-    for (const item of body) {
-        const data = {}
-        for (let i = 0; i < head.length; i++) {
-            data[head[i]] = item[i] || ""
-        }
-        jsonData.push(data)
-    }
+    // const jsonData = []
+    // for (const item of body) {
+    //     const data = {}
+    //     for (let i = 0; i < head.length; i++) {
+    //         data[head[i]] = item[i] || ""
+    //     }
+    //     jsonData.push(data)
+    // }
 
-    return jsonData;
+    return [head, body];
 }
