@@ -60,6 +60,11 @@ export const getData = (file) => {
 
     const filteredResult = filterResult.filter(item => pidCount[item["pid"]] >= 3);
 
+    if (!filterResult.length) {
+        return []
+    }
+
+    // generate new xlsx file
     const data = []
     data.push(Object.keys(filteredResult[0]))
     for (const element of filteredResult) {
@@ -84,15 +89,6 @@ export const transferXlsxToJson = (query) => {
     const workSheetsFromFile = xlsx.parse(filePath);
     const head = workSheetsFromFile[0].data[0];
     const body = workSheetsFromFile[0].data.slice(1);
-
-    // const jsonData = []
-    // for (const item of body) {
-    //     const data = {}
-    //     for (let i = 0; i < head.length; i++) {
-    //         data[head[i]] = item[i] || ""
-    //     }
-    //     jsonData.push(data)
-    // }
 
     return [head, body];
 }
