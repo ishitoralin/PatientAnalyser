@@ -8,7 +8,14 @@ import { handleThrowError } from "./helper.js"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadPath = path.join(__dirname, "../upload")
-const outputPath = path.join(__dirname, "../outputs/hello.xlsx")
+const outputPath = path.join(__dirname, "../outputs")
+const initCon = "初診"
+const subCon = "複診"
+const pidStr = "病歷號碼"
+const col5Str = "欄5"
+const nameStr = "姓名"
+const dateStr = "就診日期"
+const drStr = "醫師"
 
 export const getData = (file) => {
     const list = getList()
@@ -19,41 +26,52 @@ export const getData = (file) => {
 
     const [head, body] = transferXlsxToJson(targetFile)
 
-    const timesIndex = head.indexOf("欄5")
-    console.log(body.length)
-    body.filter((item) => item[timesIndex] === "初診" || item[timesIndex] === "複診2")
-    console.log(body.length)
-    // const jsonData = transferXlsxToJson(targetFile).filter((item) => item["欄5"] === "初診" || item["欄5"] === "複診")
-    //     .sort((a, b) => a["病歷號碼"] - (b["病歷號碼"]));
+    // get index
+    const col5Index = head.indexOf(col5Str)
+    const pidIndex = head.indexOf(pidStr)
+    const nameIndex = head.indexOf(nameStr)
+    const dateIndex = head.indexOf(dateStr)
+    const drIndex = head.indexOf(drStr)
 
-    // const oneTimePatientList = []
-    // for (const item of jsonData) {
-    //     if (item["欄5"] === "初診") {
-    //         oneTimePatientList.push(item["病歷號碼"])
-    //     }
-    // }
+    // filter body
+    const filterBody = body.filter((item) => item[col5Index] === initCon || item[col5Index] === subCon)
 
-    // const result = []
-    // for (const patient of jsonData) {
-    //     for (const pid of oneTimePatientList) {
-    //         if (patient["病歷號碼"] === pid) {
-    //             result.push({ id: patient["病歷號碼"], date: patient["就診日期"], dr: patient["醫師"], status: patient["欄5"] })
-    //         }
-    //     }
-    // }
+    // get first time patient
+    const firstTimeList = filterBody
+        .filter((item) => item[col5Index] === initCon)
+        .map((item) => item[pidIndex]);
 
-    // result.sort((a, b) => a.id - b.id);
+    // filter first time and multi > 2 patients
+    const result = []
+    for (const element of filterBody) {
+        for (const pid of firstTimeList) {
+            if (element[pidIndex] === pid) {
+                result.push({ pid: element[pidIndex], name: element[nameIndex], date: element[dateIndex], dr: element[drIndex], col5: element[col5Index] })
+                break
+            }
+        }
+    }
 
-    // const data = [
-    //     [1, 2, 3],
-    //     [true, false, null, 'sheetjs'],
-    //     ['foo', 'bar', new Date('2014-02-19T14:30Z'), '0.3'],
-    //     ['baz', null, 'qux'],
-    // ];
-    // const buffer = xlsx.build([{ name: 'mySheetName', data: data }])
+    const filterResult = result.sort((a, b) => a["pid"] - b["pid"])
+    const pidCount = filterResult.reduce((acc, item) => {
+        acc[item["pid"]] = (acc[item["pid"]] || 0) + 1;
+        return acc;
+    }, {});
 
-    // fs.writeFileSync(outputPath, buffer)
-    return body
+    const filteredResult = filterResult.filter(item => pidCount[item["pid"]] >= 3);
+
+    const data = []
+    data.push(Object.keys(filteredResult[0]))
+    for (const element of filteredResult) {
+        const values = Object.values(element)
+        data.push(values)
+    }
+
+    const buffer = xlsx.build([{ name: `${file}_filtered`, data: data }])
+
+    const fileOutput = path.join(outputPath, `filtered_${file}`)
+    fs.writeFileSync(fileOutput, buffer)
+    return data
 }
 
 export const getList = () => {
