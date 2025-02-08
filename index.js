@@ -2,7 +2,7 @@ import express from "express"
 import http from "http"
 import cors from "cors"
 import morgan from "morgan"
-// import parser from "body-parser"
+import bodyParser from "body-parser"
 import os from "os"
 import routerList from "./src/router.js"
 
@@ -11,7 +11,8 @@ const server = http.createServer(app)
 
 app.use(cors());
 app.use(morgan('dev'));
-// app.use(parser.json())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use("/", routerList)
 

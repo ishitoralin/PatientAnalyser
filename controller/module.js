@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadPath = path.join(__dirname, "../upload")
 const outputPath = path.join(__dirname, "../outputs")
-const timesParams = 3
 const initCon = "初診"
 const subCon = "複診"
 const pidStr = "病歷號碼"
@@ -18,7 +17,9 @@ const nameStr = "姓名"
 const dateStr = "就診日期"
 const drStr = "醫師"
 
-export const getData = (file) => {
+export const getData = (file, subTimes = 0, initOnly = 0) => {
+    subTimes = Number(subTimes)
+    initOnly = Number(initOnly)
     const list = getList()
     const targetFile = list.filter((item) => item === file)[0]
     if (!targetFile) {
@@ -26,7 +27,6 @@ export const getData = (file) => {
     }
 
     const [head, body] = transferXlsxToJson(targetFile)
-
     // get index
     const col5Index = head.indexOf(col5Str)
     const pidIndex = head.indexOf(pidStr)
@@ -59,12 +59,10 @@ export const getData = (file) => {
         return acc;
     }, {});
 
-    const filteredResult = filterResult.filter(item => pidCount[item["pid"]] >= timesParams);
-
+    const filteredResult = filterResult.filter(item => pidCount[item["pid"]] >= (subTimes + 1));
     if (!filterResult.length) {
         return []
     }
-
     // generate new xlsx file
     const data = []
     data.push(Object.keys(filteredResult[0]))

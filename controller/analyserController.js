@@ -26,12 +26,12 @@ const analyserController = {
     upload: upload,
     analyser_analyse: async (req, res) => {
         try {
-            const query = req.query.file
-            if (!query) {
+            const { file, sub, init } = req.query
+            if (!file) {
                 return handleError(res, "Please specify file", 404)
             }
 
-            const result = getData(query)
+            const result = getData(file, sub, init)
             return handleResult(res, result, 200)
         } catch (error) {
             return handleError(res, error.message, error.status)
