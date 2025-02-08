@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadPath = path.join(__dirname, "../upload")
 const outputPath = path.join(__dirname, "../outputs")
+const timesParams = 3
 const initCon = "初診"
 const subCon = "複診"
 const pidStr = "病歷號碼"
@@ -58,7 +59,7 @@ export const getData = (file) => {
         return acc;
     }, {});
 
-    const filteredResult = filterResult.filter(item => pidCount[item["pid"]] >= 3);
+    const filteredResult = filterResult.filter(item => pidCount[item["pid"]] >= timesParams);
 
     if (!filterResult.length) {
         return []
